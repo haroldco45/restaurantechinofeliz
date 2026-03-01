@@ -1,1 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Chino Feliz - RCF</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="rcf.PNG" alt="Logo RCF" class="logo">
+            <h1>CHINO FELIZ</h1>
+        </div>
+        <p class="horario">🕒 10 AM - 10 PM | 📍 Caucasia (Frente al Éxito)</p>
+    </header>
 
+    <main id="app">
+        <section id="user-data" class="card">
+            <h3>📋 Mis Datos de Entrega</h3>
+            <div id="display-data" class="hidden">
+                <p><strong>Nombre:</strong> <span id="lbl-nombre"></span></p>
+                <p><strong>Dirección:</strong> <span id="lbl-direccion"></span></p>
+                <p><strong>Celular:</strong> <span id="lbl-celular"></span></p>
+                <button onclick="editData()" class="btn-secondary">Editar Datos</button>
+            </div>
+            <form id="frm-registro">
+                <input type="text" id="nombre" placeholder="Tu Nombre" required>
+                <input type="text" id="direccion" placeholder="Dirección en Caucasia" required>
+                <input type="tel" id="celular" placeholder="WhatsApp / Celular" required>
+                <button type="submit" class="btn-primary">Guardar y Continuar</button>
+            </form>
+        </section>
+
+        <section id="menu" class="card">
+            <h3>🍜 Nuestra Carta</h3>
+            <div id="lista-productos">
+                <p>Cargando menú...</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="cart-drawer">
+        <div class="cart-info">
+            <span>Total: <strong id="total-val">$0</strong></span>
+        </div>
+        <button onclick="prepararPedido()" class="btn-order">🛒 HACER PEDIDO</button>
+    </div>
+
+    <footer>
+        <p>© 2026 Desarrollado por <strong>Vibras Positivas</strong> - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
