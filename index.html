@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurante Chino Feliz - RCF</title>
+    <title>Chino Feliz - RCF</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,39 +12,42 @@
             <img src="rcf.PNG" alt="Logo RCF" class="logo">
             <h1>CHINO FELIZ</h1>
         </div>
-        <p class="horario">🕒 10 AM - 10 PM | 📍 Caucasia (Frente al Éxito)</p>
+        <div class="header-info">
+            <p>🕒 10 AM - 10 PM | 📍 Caucasia (Frente al Éxito)</p>
+            <p>💰 Solo efectivo | 📱 WhatsApp: 3227241410</p>
+        </div>
     </header>
 
     <main id="app">
-        <section id="user-data" class="card">
-            <h3>📋 Mis Datos de Entrega</h3>
+        <section id="user-section" class="card">
+            <h3>📋 Datos de Entrega</h3>
             <div id="display-data" class="hidden">
-                <p><strong>Nombre:</strong> <span id="lbl-nombre"></span></p>
-                <p><strong>Dirección:</strong> <span id="lbl-direccion"></span></p>
-                <p><strong>Celular:</strong> <span id="lbl-celular"></span></p>
-                <button onclick="editData()" class="btn-secondary">Editar Datos</button>
+                <p><strong>Para:</strong> <span id="lbl-nombre"></span></p>
+                <p><strong>Dir:</strong> <span id="lbl-direccion"></span></p>
+                <button onclick="editData()" class="btn-edit">Editar Datos</button>
             </div>
             <form id="frm-registro">
-                <input type="text" id="nombre" placeholder="Tu Nombre" required>
+                <input type="text" id="nombre" placeholder="Nombre completo" required>
                 <input type="text" id="direccion" placeholder="Dirección en Caucasia" required>
-                <input type="tel" id="celular" placeholder="WhatsApp / Celular" required>
-                <button type="submit" class="btn-primary">Guardar y Continuar</button>
+                <input type="tel" id="celular" placeholder="Celular/WhatsApp" required>
+                <button type="submit" class="btn-primary">Guardar mis datos</button>
             </form>
         </section>
 
         <section id="menu" class="card">
             <h3>🍜 Nuestra Carta</h3>
             <div id="lista-productos">
-                <p>Cargando menú...</p>
+                <p>Cargando platos...</p>
             </div>
         </section>
     </main>
 
-    <div id="cart-drawer">
-        <div class="cart-info">
-            <span>Total: <strong id="total-val">$0</strong></span>
+    <div id="order-bar">
+        <div class="total-container">
+            <span>Total:</span>
+            <strong id="total-val">$0</strong>
         </div>
-        <button onclick="prepararPedido()" class="btn-order">🛒 HACER PEDIDO</button>
+        <button onclick="enviarWhatsApp()" class="btn-order">🛒 PEDIR AHORA</button>
     </div>
 
     <footer>
