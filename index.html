@@ -4,9 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chino Feliz - RCF</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- ESTILOS INTEGRADOS PARA EVITAR ERRORES --- */
+        :root {
+            --rojo-chino: #B22222;
+            --dorado: #FFD700;
+            --negro: #121212;
+            --blanco: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--negro);
+            background-image: radial-gradient(circle, #331111 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--blanco);
+            margin: 0;
+            padding-bottom: 100px;
+        }
+
+        header {
+            background-color: var(--rojo-chino);
+            text-align: center;
+            padding: 25px 15px;
+            border-bottom: 4px solid var(--dorado);
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Esto arregla el logo mocho y lo centra */
+        .logo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%; 
+            border: 4px solid var(--dorado);
+            object-fit: cover;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            color: var(--dorado);
+            margin: 15px 0 0 0;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px #000;
+        }
+
+        .header-info p { margin: 5px 0; font-size: 0.95rem; }
+
+        .card {
+            background: #fff;
+            color: #333;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .card h3 { 
+            color: var(--rojo-chino); 
+            border-bottom: 2px solid var(--dorado); 
+            margin-top: 0;
+            padding-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn-primary { 
+            background: var(--rojo-chino); 
+            color: #fff; 
+            border: none; 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            cursor: pointer; 
+        }
+
+        #order-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--rojo-chino);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 4px solid var(--dorado);
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .total-container { font-size: 1.5rem; font-weight: bold; color: var(--dorado); }
+        .btn-order { 
+            background: var(--dorado); 
+            color: var(--negro); 
+            border: none; 
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+
+        .hidden { display: none; }
+        footer { text-align: center; font-size: 0.8rem; padding: 20px; color: #888; }
+        .btn-edit { background: #666; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+    </style>
 </head>
 <body>
+
     <header>
         <div class="logo-container">
             <img src="rcf.PNG" alt="Logo RCF" class="logo">
@@ -18,27 +138,25 @@
         </div>
     </header>
 
-    <main id="app">
+    <main>
         <section id="user-section" class="card">
             <h3>📋 Datos de Entrega</h3>
             <div id="display-data" class="hidden">
                 <p><strong>Para:</strong> <span id="lbl-nombre"></span></p>
-                <p><strong>Dir:</strong> <span id="lbl-direccion"></span></p>
+                <p><strong>Dirección:</strong> <span id="lbl-direccion"></span></p>
                 <button onclick="editData()" class="btn-edit">Editar Datos</button>
             </div>
             <form id="frm-registro">
-                <input type="text" id="nombre" placeholder="Nombre completo" required>
+                <input type="text" id="nombre" placeholder="Tu Nombre completo" required>
                 <input type="text" id="direccion" placeholder="Dirección en Caucasia" required>
                 <input type="tel" id="celular" placeholder="Celular/WhatsApp" required>
-                <button type="submit" class="btn-primary">Guardar mis datos</button>
+                <button type="submit" class="btn-primary">Guardar y Continuar</button>
             </form>
         </section>
 
-        <section id="menu" class="card">
+        <section class="card">
             <h3>🍜 Nuestra Carta</h3>
-            <div id="lista-productos">
-                <p>Cargando platos...</p>
-            </div>
+            <div id="lista-productos">Cargando platos...</div>
         </section>
     </main>
 
@@ -47,13 +165,98 @@
             <span>Total:</span>
             <strong id="total-val">$0</strong>
         </div>
-        <button onclick="enviarWhatsApp()" class="btn-order">🛒 PEDIR AHORA</button>
+        <button onclick="enviarWhatsApp()" class="btn-order">PEDIR AHORA 🛒</button>
     </div>
 
     <footer>
         <p>© 2026 Desarrollado por <strong>Vibras Positivas</strong> - Todos los derechos reservados</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        const WHATSAPP_NUM = "573227241410";
+        let carrito = [];
+        let miUbicacion = "No activada";
+
+        window.onload = () => {
+            const usuario = JSON.parse(localStorage.getItem('rcf_data'));
+            if (usuario) {
+                mostrarDatos(usuario);
+            }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    miUbicacion = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                });
+            }
+            renderMenu();
+        };
+
+        const platos = [
+            { id: 1, nombre: "Arroz Especial RCF", precio: 28000 },
+            { id: 2, nombre: "Chop Suey Mixto", precio: 25000 },
+            { id: 3, nombre: "Lumpias (3 und)", precio: 12000 },
+            { id: 4, nombre: "Combo Familiar", precio: 65000 }
+        ];
+
+        function renderMenu() {
+            const list = document.getElementById('lista-productos');
+            list.innerHTML = platos.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div><strong>${p.nombre}</strong><br><span style="color:green">$${p.precio.toLocaleString()}</span></div>
+                    <button onclick="agregar(${p.id})" style="background:var(--dorado); border:none; border-radius:50%; width:35px; height:35px; font-weight:bold; cursor:pointer;">+</button>
+                </div>
+            `).join('');
+        }
+
+        function agregar(id) {
+            const p = platos.find(item => item.id === id);
+            carrito.push(p);
+            const total = carrito.reduce((acc, item) => acc + item.precio, 0);
+            document.getElementById('total-val').innerText = `$${total.toLocaleString()}`;
+        }
+
+        document.getElementById('frm-registro').onsubmit = (e) => {
+            e.preventDefault();
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                direccion: document.getElementById('direccion').value,
+                celular: document.getElementById('celular').value
+            };
+            localStorage.setItem('rcf_data', JSON.stringify(datos));
+            mostrarDatos(datos);
+        };
+
+        function mostrarDatos(u) {
+            document.getElementById('frm-registro').classList.add('hidden');
+            document.getElementById('display-data').classList.remove('hidden');
+            document.getElementById('lbl-nombre').innerText = u.nombre;
+            document.getElementById('lbl-direccion').innerText = u.direccion;
+        }
+
+        function editData() {
+            document.getElementById('frm-registro').classList.remove('hidden');
+            document.getElementById('display-data').classList.add('hidden');
+        }
+
+        function enviarWhatsApp() {
+            const user = JSON.parse(localStorage.getItem('rcf_data'));
+            if (!user) return alert("Primero guarda tus datos de entrega.");
+            if (carrito.length === 0) return alert("El carrito está vacío.");
+
+            let total = carrito.reduce((acc, p) => acc + p.precio, 0);
+            let detalle = carrito.map(p => `- ${p.nombre}`).join('%0A');
+
+            let texto = `*🍜 PEDIDO - CHINO FELIZ*%0A`;
+            texto += `*Cliente:* ${user.nombre}%0A`;
+            texto += `*Dirección:* ${user.direccion}%0A`;
+            texto += `*Ubicación:* ${miUbicacion}%0A`;
+            texto += `--------------------------------%0A`;
+            texto += `*PRODUCTOS:*%0A${detalle}%0A`;
+            texto += `--------------------------------%0A`;
+            texto += `*TOTAL:* $${total.toLocaleString()}%0A`;
+            texto += `*PAGO:* EFECTIVO 💵%0A`;
+
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${texto}`, '_blank');
+        }
+    </script>
 </body>
 </html>
