@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chino Feliz - RCF</title>
     <style>
-        /* --- ESTILOS INTEGRADOS PARA EVITAR ERRORES --- */
         :root {
             --rojo-chino: #B22222;
             --dorado: #FFD700;
@@ -20,13 +19,13 @@
             background-size: 30px 30px;
             color: var(--blanco);
             margin: 0;
-            padding-bottom: 100px;
+            padding-bottom: 110px;
         }
 
         header {
             background-color: var(--rojo-chino);
             text-align: center;
-            padding: 25px 15px;
+            padding: 20px 15px;
             border-bottom: 4px solid var(--dorado);
         }
 
@@ -37,25 +36,24 @@
             margin-bottom: 10px;
         }
 
-        /* Esto arregla el logo mocho y lo centra */
         .logo {
             width: 140px;
             height: 140px;
             border-radius: 50%; 
             border: 4px solid var(--dorado);
-            object-fit: cover;
+            object-fit: contain;
             background-color: white;
             box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         header h1 {
             color: var(--dorado);
-            margin: 15px 0 0 0;
+            margin: 10px 0 0 0;
             font-size: 2.2rem;
             text-shadow: 2px 2px #000;
         }
 
-        .header-info p { margin: 5px 0; font-size: 0.95rem; }
+        .header-info p { margin: 3px 0; font-size: 0.95rem; }
 
         .card {
             background: #fff;
@@ -91,8 +89,28 @@
             width: 100%; 
             border-radius: 6px; 
             font-weight: bold; 
-            font-size: 1.1rem;
             cursor: pointer; 
+        }
+
+        /* Controles de cantidad */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-qty {
+            background: var(--dorado);
+            border: none;
+            border-radius: 5px;
+            width: 35px;
+            height: 35px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #order-bar {
@@ -100,7 +118,7 @@
             bottom: 0;
             width: 100%;
             background: var(--rojo-chino);
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -109,7 +127,7 @@
             z-index: 1000;
         }
 
-        .total-container { font-size: 1.5rem; font-weight: bold; color: var(--dorado); }
+        .total-container { font-size: 1.4rem; font-weight: bold; color: var(--dorado); }
         .btn-order { 
             background: var(--dorado); 
             color: var(--negro); 
@@ -162,7 +180,7 @@
 
     <div id="order-bar">
         <div class="total-container">
-            <span>Total:</span>
+            <span style="font-size: 0.8rem; display: block; color: white;">Total Pedido:</span>
             <strong id="total-val">$0</strong>
         </div>
         <button onclick="enviarWhatsApp()" class="btn-order">PEDIR AHORA 🛒</button>
@@ -174,14 +192,13 @@
 
     <script>
         const WHATSAPP_NUM = "573227241410";
-        let carrito = [];
-        let miUbicacion = "No activada";
+        let carrito = {}; // Usamos un objeto para rastrear cantidades por ID
+        let miUbicacion = "No proporcionada";
 
         window.onload = () => {
             const usuario = JSON.parse(localStorage.getItem('rcf_data'));
-            if (usuario) {
-                mostrarDatos(usuario);
-            }
+            if (usuario) mostrarDatos(usuario);
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     miUbicacion = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
@@ -202,16 +219,25 @@
             list.innerHTML = platos.map(p => `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
                     <div><strong>${p.nombre}</strong><br><span style="color:green">$${p.precio.toLocaleString()}</span></div>
-                    <button onclick="agregar(${p.id})" style="background:var(--dorado); border:none; border-radius:50%; width:35px; height:35px; font-weight:bold; cursor:pointer;">+</button>
+                    <div class="controls">
+                        <button class="btn-qty" onclick="actualizarCantidad(${p.id}, -1)">-</button>
+                        <strong id="qty-${p.id}">0</strong>
+                        <button class="btn-qty" onclick="actualizarCantidad(${p.id}, 1)">+</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function agregar(id) {
-            const p = platos.find(item => item.id === id);
-            carrito.push(p);
-            const total = carrito.reduce((acc, item) => acc + item.precio, 0);
-            document.getElementById('total-val').innerText = `$${total.toLocaleString()}`;
+        function actualizarCantidad(id, cambio) {
+            if (!carrito[id]) carrito[id] = 0;
+            carrito[id] = Math.max(0, carrito[id] + cambio);
+            document.getElementById(`qty-${id}`).innerText = carrito[id];
+            
+            let totalGeneral = 0;
+            platos.forEach(p => {
+                if (carrito[p.id]) totalGeneral += p.precio * carrito[p.id];
+            });
+            document.getElementById('total-val').innerText = `$${totalGeneral.toLocaleString()}`;
         }
 
         document.getElementById('frm-registro').onsubmit = (e) => {
@@ -239,23 +265,34 @@
 
         function enviarWhatsApp() {
             const user = JSON.parse(localStorage.getItem('rcf_data'));
-            if (!user) return alert("Primero guarda tus datos de entrega.");
-            if (carrito.length === 0) return alert("El carrito está vacío.");
+            if (!user) return alert("Por favor, completa tus datos de entrega.");
+            
+            let pedidoActivo = platos.filter(p => carrito[p.id] > 0);
+            if (pedidoActivo.length === 0) return alert("El carrito está vacío.");
 
-            let total = carrito.reduce((acc, p) => acc + p.precio, 0);
-            let detalle = carrito.map(p => `- ${p.nombre}`).join('%0A');
+            let totalFinal = 0;
+            let cuerpoFactura = "";
 
-            let texto = `*🍜 PEDIDO - CHINO FELIZ*%0A`;
-            texto += `*Cliente:* ${user.nombre}%0A`;
-            texto += `*Dirección:* ${user.direccion}%0A`;
-            texto += `*Ubicación:* ${miUbicacion}%0A`;
-            texto += `--------------------------------%0A`;
-            texto += `*PRODUCTOS:*%0A${detalle}%0A`;
-            texto += `--------------------------------%0A`;
-            texto += `*TOTAL:* $${total.toLocaleString()}%0A`;
-            texto += `*PAGO:* EFECTIVO 💵%0A`;
+            pedidoActivo.forEach(p => {
+                let cant = carrito[p.id];
+                let subtotal = p.precio * cant;
+                totalFinal += subtotal;
+                cuerpoFactura += `${cant} x ${p.nombre}%0A   (Un. $${p.precio.toLocaleString()}) = *$${subtotal.toLocaleString()}*%0A`;
+            });
 
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${texto}`, '_blank');
+            let mensaje = `*🍜 NUEVO PEDIDO - CHINO FELIZ*%0A%0A`;
+            mensaje += `*CLIENTE:* ${user.nombre}%0A`;
+            mensaje += `*DIRECCIÓN:* ${user.direccion}%0A`;
+            mensaje += `*TEL:* ${user.celular}%0A`;
+            mensaje += `*UBICACIÓN:* ${miUbicacion}%0A`;
+            mensaje += `--------------------------------%0A`;
+            mensaje += `*DETALLE DEL PEDIDO:*%0A${cuerpoFactura}`;
+            mensaje += `--------------------------------%0A`;
+            mensaje += `*TOTAL A PAGAR: $${totalFinal.toLocaleString()}*%0A`;
+            mensaje += `*FORMA DE PAGO: EFECTIVO* 💵%0A%0A`;
+            mensaje += `_Desarrollado por Vibras Positivas_`;
+
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${mensaje}`, '_blank');
         }
     </script>
 </body>
